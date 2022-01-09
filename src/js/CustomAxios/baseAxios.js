@@ -26,9 +26,9 @@ export class BaseAxios {
     }
 
     async deleteData(url, config = {}){
-        const {data} = await this.instance.delete(url, config)
+        return await this.instance.delete(url, config)
         // console.log(data)
-        return data
+        //return data
         
     }
 }

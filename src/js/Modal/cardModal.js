@@ -38,7 +38,7 @@ export class CardModal extends BaseAxios {
   createCardModal() {
     this.modal = document.createElement("div");
     this.modal.innerHTML = `
-        <div class="modal modal-sheet  d-block bg-secondary  py-5" tabindex="-1" role="dialog" id="modalSheet">
+        <div class="modal-sheet  d-block bg-secondary  py-5" tabindex="-1" role="dialog" id="modalSheet">
             <div class="modal-dialog" role="document">
                     <div class="modal-content rounded-6 shadow">
                     <div class="modal-header border-bottom-0 mb-3">

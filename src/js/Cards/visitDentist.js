@@ -1,8 +1,8 @@
 import { Visit } from "./visit";
 
 export class VisitDentist extends Visit{
-    constructor(data){
-        super(data)
+    constructor(data, token){
+        super(data, token)
         const {prevVisit} = data
         this.previousVisit = prevVisit
     }

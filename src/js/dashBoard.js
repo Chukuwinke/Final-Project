@@ -1,4 +1,3 @@
-
 import { AllCards } from "./Cards/allCard"
 import { Login } from "./Login/login"
 import { CardModal } from "./Modal/cardModal"
@@ -29,7 +28,6 @@ export class DashBoard {
           </div>
           
         </header>
-
         <div class="container-fluid">
         <div class="row">
             <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
@@ -55,7 +53,6 @@ export class DashBoard {
                             </a>
                         </li>
                         </ul>
-
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
                         <span>Search by urgency</span>
                         <a class="link-secondary" href="#" aria-label="Add a new report">
@@ -84,13 +81,11 @@ export class DashBoard {
                         </ul>
             </div>
             </nav>
-
             <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-sm-3">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center  pb-2 mb-3 border-bottom">
                 <h1 class="h2">Dashboard</h1>
                 
             </div>
-
             <h2>Section title</h2>
             <ul class="table-responsive d-flex">
                 
@@ -98,11 +93,10 @@ export class DashBoard {
             </div>
         </div>
         </div>
-
         `
         this.main.appendChild(this.dashboardContainer)
         
-        this.renderDashBoard()
+        // this.renderDashBoard()
         
         this.cardsContainer = document.querySelector('.table-responsive')
         this.createCardBtn = document.querySelector('.create-visit-btn')
@@ -153,7 +147,7 @@ export class DashBoard {
         if(this.loggedIn == 'true'){
             const expiryDate = new Date()
             expiryDate.setMonth(expiryDate.getMonth() + 1)
-            
+            this.renderDashBoard()
             login.setCookie(this.newUserKey, true, expiryDate.toGMTString());
 
         }
@@ -162,7 +156,10 @@ export class DashBoard {
             //this.addDashBoard()
             
             this.authBtn.innerHTML = 'Sign in'
-            this.cardsContainer.innerHTML= ''
+            //this.cardsContainer.innerHTML= ''
+
+            // should display no cards if no user not logged in
+            this.noCards
             this.createCardBtn.style.display ='none'
 
             this.authBtn.onclick = () => {
@@ -180,6 +177,7 @@ export class DashBoard {
         cardsDisplay.getCardsData().then(Response => {
             
             if(Response.length == 0){
+                // should display no cards if there are no cards available
                 this.noCards()
             }
             else{
@@ -200,6 +198,7 @@ export class DashBoard {
     }
     // IF THERE ARE NO CARDS RENDER NO CARDS
     noCards(){
+        console.log('working')
         this.noCardsDisplay = document.createElement('li')
         this.noCardsDisplay.className = 'nocard-container'
         this.noCardsDisplay.innerHTML = `

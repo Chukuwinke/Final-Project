@@ -1,8 +1,9 @@
 import { BaseAxios } from "../CustomAxios/baseAxios";
+import { DeleteCards } from "./deleteCards";
 
 export class Visit extends BaseAxios{
     constructor(data){
-        super()
+        super('https://ajax.test-danit.com/api/v2/cards/')
         const {Doctor, FirstName, LastName, Purpose, Description, Urgency, Status, id} = data
         this.firstName = FirstName
         this.lastName = LastName
@@ -12,6 +13,7 @@ export class Visit extends BaseAxios{
         this.urgency = Urgency
         this.status = Status
         this.id = id
+        
         this.cardsSection = document.querySelector('.table-responsive')
         
     }
@@ -19,15 +21,16 @@ export class Visit extends BaseAxios{
     defaultCardField(data) {
         //this.cardContainer = document.createElement('ul')
         this.card = document.createElement('li')
+        this.card.setAttribute('id', `card${this.id}`)
         this.card.innerHTML =`
-        <div class="card" id=card${this.id} style="width: 18rem;">
+        <div class="card" id=card style="width: 18rem;">
             <div class="card-body">
                 <div class="d-flex justify-content-end w-100">
-                    <button type="button" class="btn-close ms-auto" aria-label="Close"></button>
+                    <button type="button" class="btn-close ms-auto" id="delete-btn${this.id}" aria-label="Close"></button>
                 </div>
                 <h6 class="card-title">Patient: ${this.firstName} ${this.lastName}</h5>
                 <h6 class="card-subtitle mb-2 text-muted">Doctor: ${this.doctor}</h6>
-                <div class="collapse Data__box" id="collapseExample">
+                <div class="collapse Data__box" id="collapseExample${this.id}">
                     <div>
                         <h6>purpose of the visit: </h6>
                         <p>${this.purpose}</p>
@@ -43,8 +46,8 @@ export class Visit extends BaseAxios{
                 </div>
                 
                 <div class="d-flex mt-2">
-                    <a href="#" class="btn btn-outline-warning btn-sm">edit</a>
-                    <a class="btn btn-outline-info btn-sm ms-auto" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                    <a href="#" class="btn btn-outline-warning btn-sm" >edit</a>
+                    <a class="btn btn-outline-info btn-sm ms-auto" data-bs-toggle="collapse" href="#collapseExample${this.id}" role="button" aria-expanded="false" aria-controls="collapseExample">
                         show more
                     </a>
                 </div>
@@ -52,6 +55,34 @@ export class Visit extends BaseAxios{
         </div>
         `
         this.cardsSection.appendChild(this.card)
+        this.deleteCard()
+        
+    }
+    deleteCard(){
+        this.deleteBtn = document.getElementById(`delete-btn${this.id}`)
+        this.currentCard = document.getElementById(`card${this.id}`)
+        
+        this.config = {
+            headers:{
+	            'Authorization': `Bearer ${this.token}`
+            }
+        }
+        this.url = `${this.id}`
+        
+        this.deleteBtn.onclick = () =>{
+            const deleteLogic = new DeleteCards(this.url)
+            deleteLogic.delete()
+            .then(response => {
+                console.log(response)
+                if(response.status == 200){
+                    this.cardsSection.removeChild(this.card)
+                }
+                
+            })
+
+            
+        }
+
     }
 }
 

@@ -1,7 +1,7 @@
 import { DashBoard } from "../dashBoard";
 import { LoginAuth } from "./loginAuth.js";
 
-export class Login {
+export class Login{
     constructor(){
         this.main = document.querySelector('.main')
         this.body = document.getElementsByTagName('body')[0]
@@ -74,8 +74,10 @@ export class Login {
 
               const dashboardPage = new DashBoard();
               dashboardPage.addDashBoard();
+              
               this.setCookie('isLoggedIn', true, expiryDate.toGMTString())
               this.setCookie('token', data, expiryDate.toGMTString())
+              dashboardPage.renderDashBoard()
               //dashboardPage.renderDashBoard()
             }
             
@@ -95,4 +97,3 @@ export class Login {
         
     }
 }
-
