@@ -21,6 +21,7 @@ export class Visit extends BaseAxios{
     defaultCardField(data) {
         //this.cardContainer = document.createElement('ul')
         this.card = document.createElement('li')
+        this.card.className = 'me-4'
         this.card.setAttribute('id', `card${this.id}`)
         this.card.innerHTML =`
         <div class="card" id=card style="width: 18rem;">
@@ -28,7 +29,7 @@ export class Visit extends BaseAxios{
                 <div class="d-flex justify-content-end w-100">
                     <button type="button" class="btn-close ms-auto" id="delete-btn${this.id}" aria-label="Close"></button>
                 </div>
-                <h6 class="card-title">Patient: ${this.firstName} ${this.lastName}</h5>
+                <h6 class="card-title">Patient: <span> ${this.firstName} ${this.lastName} </span></h6>
                 <h6 class="card-subtitle mb-2 text-muted">Doctor: ${this.doctor}</h6>
                 <div class="collapse Data__box" id="collapseExample${this.id}">
                     <div>
@@ -73,9 +74,17 @@ export class Visit extends BaseAxios{
             const deleteLogic = new DeleteCards(this.url)
             deleteLogic.delete()
             .then(response => {
-                console.log(response)
                 if(response.status == 200){
                     this.cardsSection.removeChild(this.card)
+                    const card = document.querySelector('.card')
+                    if(!card){
+                        this.noCardsDisplay = document.createElement('li')
+                        this.noCardsDisplay.className = 'nocard-container'
+                        this.noCardsDisplay.innerHTML = `
+                            <h4 class="nocard-text">No Cards Available</h4>
+                        `
+                        this.cardsSection.appendChild(this.noCardsDisplay)
+                    }
                 }
                 
             })

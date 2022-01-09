@@ -1,16 +1,17 @@
 import { Visit } from "./visit";
 
 export class VisitDentist extends Visit{
-    constructor(data, token){
-        super(data, token)
-        const {prevVisit} = data
+    constructor(data){
+        super(data)
+        const {prevVisit, id} = data
         this.previousVisit = prevVisit
+        this.id = id
     }
     dentistData(){
-        this.therapistField = document.querySelector('.Data__box')
+        this.therapistField = document.querySelector(`#card${this.id} .Data__box`)
         this.patientData = document.createElement('div')
         this.patientData.innerHTML=`
-            <h6>Blood Pressure:</h6> <span>${this.previousVisit}</span>
+            <h6>Previous Visit:</h6> <span>${this.previousVisit}</span>
         `
         this.therapistField.appendChild(this.patientData)
     }

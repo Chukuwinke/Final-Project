@@ -3,6 +3,7 @@ import { Login } from "./Login/login"
 import { CardModal } from "./Modal/cardModal"
 import { VisitCardiologist } from "./Cards/visitCardiologist"
 import { VisitTherapist } from "./Cards/visitTherapist"
+import { VisitDentist } from "./Cards/visitDentist"
 export class DashBoard {
     constructor(){
         this.main = document.querySelector('.main')
@@ -13,7 +14,11 @@ export class DashBoard {
         this.dashboardContainer.className = 'dshboard-container'
         this.dashboardContainer.innerHTML =`
         <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-          <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="#">Company name</a>
+        <div class="navbar-brand col-md-3 col-lg-2 me-0 px-3">
+        <img class="logo" src="images/content/infinityLogo.svg" alt="">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="#">Appointment Tracker</a>
+        </div>
+            
           <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
@@ -32,7 +37,7 @@ export class DashBoard {
         <div class="row">
             <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
             <div class="position-sticky pt-3">
-            <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
+            <input class="form-control form-control-dark w-100" id="search-input" type="text" placeholder="Search" aria-label="Search">
             <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
                         <span>search by status</span>
                         <a class="link-secondary" href="#" aria-label="Add a new report">
@@ -86,8 +91,7 @@ export class DashBoard {
                 <h1 class="h2">Dashboard</h1>
                 
             </div>
-            <h2>Section title</h2>
-            <ul class="table-responsive d-flex">
+            <ul class="table-responsive d-flex justify-content-start">
                 
             </ul>
             </div>
@@ -101,6 +105,7 @@ export class DashBoard {
         this.cardsContainer = document.querySelector('.table-responsive')
         this.createCardBtn = document.querySelector('.create-visit-btn')
         this.authBtn = document.querySelector('.auth')
+        this.searchInput = document.getElementById('search-input')
         
         // CREATE CARD BUTTON
         this.createCardBtn.onclick = () =>{
@@ -119,6 +124,9 @@ export class DashBoard {
             this.main.removeChild(this.dashboardContainer)
             this.authCheck()
             
+        }
+        this.searchInput.onkeyup = () =>{
+            this.filterCard()
         }
         
 
@@ -159,7 +167,7 @@ export class DashBoard {
             //this.cardsContainer.innerHTML= ''
 
             // should display no cards if no user not logged in
-            this.noCards
+            this.noCards()
             this.createCardBtn.style.display ='none'
 
             this.authBtn.onclick = () => {
@@ -191,18 +199,36 @@ export class DashBoard {
                         const visitCard = new VisitTherapist(element)
                         visitCard.render()
                     }
+                    if(element.Doctor == 'Dentist'){
+                        const visitCard = new VisitDentist(element)
+                        visitCard.render()
+                    }
                 });
             }
             
         })
     }
+    // FILTER CARDS
+    filterCard(){
+        
+        this.cards = this.cardsContainer.getElementsByTagName('li')
+        const filter = this.searchInput.value.toUpperCase();
+        for (let i = 0; i < this.cards.length; i++) {
+            const patient = this.cards[i].querySelector('.card-title span')
+            const txtValue = patient.textContent || patient.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                this.cards[i].style.display = "";
+            } else {
+                this.cards[i].style.display = "none";
+            }
+        }
+    }
     // IF THERE ARE NO CARDS RENDER NO CARDS
     noCards(){
-        console.log('working')
         this.noCardsDisplay = document.createElement('li')
         this.noCardsDisplay.className = 'nocard-container'
         this.noCardsDisplay.innerHTML = `
-            <h4 class="nocard-text">No Cards Available</h4>
+            <h4 class="nocard-text ">No Cards Available</h4>
         `
         this.cardsContainer.appendChild(this.noCardsDisplay)
     }

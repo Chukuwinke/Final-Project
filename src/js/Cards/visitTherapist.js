@@ -18,7 +18,6 @@ export class VisitTherapist extends Visit{
     render(){
         this.defaultCardField()
         this.therapistData()
-        console.log(this.age)
 
     }
 }

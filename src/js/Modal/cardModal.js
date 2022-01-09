@@ -8,13 +8,11 @@ import { BaseAxios } from "../CustomAxios/baseAxios";
 
 const getCookie = (name) => {
   const cookiesArr = document.cookie.split(";")
-  console.log(cookiesArr)
 
   for(let i = 0; i < cookiesArr.length; i++){
       const cookiePair = cookiesArr[i].split('=');
 
       if(name == cookiePair[0].trim()) {
-          console.log(cookiePair[1])
           return cookiePair[1]
       }
   }
@@ -38,7 +36,7 @@ export class CardModal extends BaseAxios {
   createCardModal() {
     this.modal = document.createElement("div");
     this.modal.innerHTML = `
-        <div class="modal-sheet  d-block bg-secondary  py-5" tabindex="-1" role="dialog" id="modalSheet">
+        <div class="modal modal-sheet  d-block bg-secondary  py-5" tabindex="-1" role="dialog" id="modalSheet">
             <div class="modal-dialog" role="document">
                     <div class="modal-content rounded-6 shadow">
                     <div class="modal-header border-bottom-0 mb-3">
@@ -115,18 +113,14 @@ export class CardModal extends BaseAxios {
       const [statusValue, statusText] = this.modalDropdown(this.status)
       this.statusValue = statusValue
       this.statusText = statusText
-      console.log(this.statusText)
     }
-    console.log(this.statusText)
     
     //logic to switch urgency
     this.urgency.onchange = () => {
       const [urgencyValue, urgencyText] = this.modalDropdown(this.urgency)
       this.urgencyText = urgencyText
       this.urgencyValue = urgencyValue  
-      //console.log(this.urgencyText)
     }
-    console.log(this.urgencyText)
 
     //Remove Modal
     this.modalCancel = document.getElementById('modal-close')
@@ -198,13 +192,11 @@ export class CardModal extends BaseAxios {
       
         
       if (selectedValue == "1") {
-        //console.log("cardio");
         this.cardiologistFields();
         const bloodPressure = document.getElementById('pressureInput1')
         const prevDiseases = document.getElementById('cardiovascularInput1')
         this.age = document.getElementById('ageInput1')
         this.saveBtn.onclick = () => {
-          console.log(selectedText);
           this.data ={
             Doctor: `${selectedText}`,
             FirstName: `${this.firstName.value}`,
@@ -222,11 +214,9 @@ export class CardModal extends BaseAxios {
         };
         
       } else if (selectedValue == "2") {
-        //console.log("dent");
         this.dentistFields();
         this.lastVisit = document.getElementById('last-visit')
         this.saveBtn.onclick = () => {
-          console.log(selectedText);
           this.data ={
             Doctor: `${selectedText}`,
             FirstName: `${this.firstName.value}`,
@@ -240,11 +230,9 @@ export class CardModal extends BaseAxios {
           this.sendInput(this.data)
         };
       } else if (selectedValue == "3") {
-        //console.log("thera");
         this.therapistFields();
         this.age = document.getElementById('ageInput1')
         this.saveBtn.onclick = () => {
-          console.log(selectedText);
           this.data ={
             Doctor: `${selectedText}`,
             FirstName: `${this.firstName.value}`,
@@ -255,8 +243,7 @@ export class CardModal extends BaseAxios {
             Status: `${this.statusText}`,
             Age: `${this.age.value}`,
           }
-          //console.log(this.data)
-            this.sendInput(this.data, selectedValue)
+            this.sendInput(this.data)
             
         };
       } else {
@@ -265,31 +252,29 @@ export class CardModal extends BaseAxios {
     };
   }
   // SEND INPUT TO BACKEND AND RENDER CARD TO DASHBOARD WITH RESPONSE
-  sendInput(fieldsData, selected){
+  sendInput(fieldsData){
     const responseData = this.postData(this.url, fieldsData, this.config)
       responseData.then(response => {
-          //console.log(response)
           if(response.status == 200){
-            
+            if(this.noCardsDisplay){
               this.cardsContainer.removeChild(this.noCardsDisplay)
-          
+            }
+             
+
             const {data} = response
-            if(selected = '1'){
+            if(data.Doctor == 'Cardiologist'){
               const visit = new VisitCardiologist(data)
               visit.render()
             }
-            else if(selected = '2'){
+            else if(data.Doctor == 'Dentist'){
               const visit = new VisitDentist(data)
               visit.render()
             }
-            else if(selected = '3'){
+            else if(data.Doctor == 'Therapist'){
               const visit = new VisitTherapist(data);
               visit.render()
             }
             
-
-            // console.log(data)
-            // return data
           }
       })
       this.body.removeChild(this.modal)
