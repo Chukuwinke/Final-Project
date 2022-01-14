@@ -31,4 +31,7 @@ export class BaseAxios {
         //return data
         
     }
+    async updateData(){
+        return await this.instance.put(url, body, config)
+    }
 }

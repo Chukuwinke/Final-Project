@@ -1,3 +1,4 @@
+import { main } from "@popperjs/core";
 import { DashBoard } from "../dashBoard";
 import { LoginAuth } from "./loginAuth.js";
 
@@ -39,7 +40,15 @@ export class Login{
       </div>
         `
         this.main.appendChild(this.loginContainer)
-        
+        this.body.onclick = (e) => {
+          if(e.target.className == this.loginContainer.className || e.target.className == this.body.className){
+            console.log(this.main)
+            this.main.removeChild(this.loginContainer)
+            this.body.classList.remove('login-body')
+            const dashboardPage = new DashBoard();
+            dashboardPage.authCheck()
+          }
+        }
         
     }
 
