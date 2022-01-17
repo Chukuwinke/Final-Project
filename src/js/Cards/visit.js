@@ -1,7 +1,5 @@
-//import { BaseAxios } from "../CustomAxios/baseAxios";
 import { LoginAuth } from "../Login/loginAuth";
 import { CardModal } from "../Modal/cardModal";
-import { DeleteCards } from "./deleteCards";
 
 export class Visit extends LoginAuth{
     constructor(data){
