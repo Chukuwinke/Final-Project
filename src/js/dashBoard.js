@@ -1,21 +1,21 @@
-import { AllCards } from "./Cards/allCard"
-import { Login } from "./Login/login"
-import { CardModal } from "./Modal/cardModal"
-import { VisitCardiologist } from "./Cards/visitCardiologist"
-import { VisitTherapist } from "./Cards/visitTherapist"
-import { VisitDentist } from "./Cards/visitDentist"
-import { LoginAuth } from "./Login/loginAuth"
+import { AllCards } from "./Cards/allCard";
+import { Login } from "./Login/login";
+import { CardModal } from "./Modal/cardModal";
+import { VisitCardiologist } from "./Cards/visitCardiologist";
+import { VisitTherapist } from "./Cards/visitTherapist";
+import { VisitDentist } from "./Cards/visitDentist";
+import { LoginAuth } from "./Login/loginAuth";
 
 export class DashBoard extends LoginAuth {
-    constructor(){
-        super()
-        this.main = document.querySelector('.main')
-        this.newUserKey = 'isLoggedIn'
-    }
-    addDashBoard(){
-        this.dashboardContainer = document.createElement('div')
-        this.dashboardContainer.className = 'dshboard-container'
-        this.dashboardContainer.innerHTML =`
+  constructor() {
+    super();
+    this.main = document.querySelector(".main");
+    this.newUserKey = "isLoggedIn";
+  }
+  addDashBoard() {
+    this.dashboardContainer = document.createElement("div");
+    this.dashboardContainer.className = "dshboard-container";
+    this.dashboardContainer.innerHTML = `
         <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
         <div class="navbar-brand col-md-3 col-lg-2 me-0 px-3">
         <img class="logo" src="images/content/infinityLogo.svg" alt="">
@@ -81,157 +81,139 @@ export class DashBoard extends LoginAuth {
             </div>
         </div>
         </div>
-        `
-        this.main.appendChild(this.dashboardContainer)
-        
-        this.cardsContainer = document.querySelector('.table-responsive')
-        this.createCardBtn = document.querySelector('.create-visit-btn')
-        this.authBtn = document.querySelector('.auth')
-        this.searchInput = document.getElementById('search-input')
-        this.urgencyselect = document.getElementById('urgency')
-        this.statusSelect = document.getElementById('status')
-        
-        // CREATE CARD BUTTON
-        this.createCardBtn.onclick = () =>{
-            const modal = new CardModal();
-            modal.createCardModal()
-            
-        }
-        // SIGN OUT BUTTON
-        this.authBtn.onclick = () => {
-            //this.cardsContainer.removeChild(this.noCardsDisplay)
-            
-            document.cookie = `isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 GMT;`;
-            document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:00 GMT;`;
-            //remember remove dashboard from main
-            
-            this.main.removeChild(this.dashboardContainer)
-            this.authCheck()
-            
-        }
-        this.searchInput.onkeyup = () =>{
-            this.filterCard()
-        }
-        
-        this.filterDropdown(this.urgencyselect, 'urgency-desc')
-        this.filterDropdown(this.statusSelect, 'status-desc')
-        
+        `;
+    this.main.appendChild(this.dashboardContainer);
+
+    this.cardsContainer = document.querySelector(".table-responsive");
+    this.createCardBtn = document.querySelector(".create-visit-btn");
+    this.authBtn = document.querySelector(".auth");
+    this.searchInput = document.getElementById("search-input");
+    this.urgencyselect = document.getElementById("urgency");
+    this.statusSelect = document.getElementById("status");
+
+    // CREATE CARD BUTTON
+    this.createCardBtn.onclick = () => {
+      const modal = new CardModal();
+      modal.createCardModal();
+    };
+    // SIGN OUT BUTTON
+    this.authBtn.onclick = () => {
+      document.cookie = `isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 GMT;`;
+      document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:00 GMT;`;
+
+      this.main.removeChild(this.dashboardContainer);
+      this.authCheck();
+    };
+    this.searchInput.onkeyup = () => {
+      this.filterCard();
+    };
+
+    this.filterDropdown(this.urgencyselect, "urgency-desc");
+    this.filterDropdown(this.statusSelect, "status-desc");
+  }
+
+  // CHECK IF IT IS A NEW USER
+  authCheck() {
+    this.loggedIn = this.getCookies(this.newUserKey);
+    this.addDashBoard();
+    this.cardsContainer.innerHTML = "";
+    if (this.loggedIn == "true") {
+      const expiryDate = new Date();
+      expiryDate.setMonth(expiryDate.getMonth() + 1);
+      this.renderDashBoard();
+      this.setCookie(this.newUserKey, true, expiryDate.toGMTString());
+    } else if (!this.loggedIn) {
+      const login = new Login();
+
+      this.authBtn.innerHTML = "Sign in";
+
+      // should display no cards if no user not logged in
+      this.noCards();
+      this.createCardBtn.style.display = "none";
+
+      this.authBtn.onclick = () => {
+        this.main.removeChild(this.dashboardContainer);
+        login.start();
+      };
     }
+  }
+  // RENDER ALL AVAILABLE CARDS TO DASHBOARD
+  renderDashBoard() {
+    const cardsDisplay = new AllCards();
 
-    // CHECK IF IT IS A NEW USER
-    authCheck(){ 
-        this.loggedIn = this.getCookies(this.newUserKey)
-        this.addDashBoard()
-        this.cardsContainer.innerHTML= ''
-        if(this.loggedIn == 'true'){
-            const expiryDate = new Date()
-            expiryDate.setMonth(expiryDate.getMonth() + 1)
-            this.renderDashBoard()
-            this.setCookie(this.newUserKey, true, expiryDate.toGMTString());
-
-        }
-        else if(!this.loggedIn){
-            const login = new Login()
-            //this.addDashBoard()
-            
-            this.authBtn.innerHTML = 'Sign in'
-            //this.cardsContainer.innerHTML= ''
-
-            // should display no cards if no user not logged in
-            this.noCards()
-            this.createCardBtn.style.display ='none'
-
-            this.authBtn.onclick = () => {
-                this.main.removeChild(this.dashboardContainer)
-                login.start()
-            }
-            
-        }
+    cardsDisplay.getCardsData().then((Response) => {
+      if (Response.length == 0) {
+        // should display no cards if there are no cards available
+        this.noCards();
+      } else {
+        Response.forEach((element) => {
+          if (element.Doctor == "Cardiologist") {
+            const visitCard = new VisitCardiologist(element);
+            visitCard.render();
+          }
+          if (element.Doctor == "Therapist") {
+            const visitCard = new VisitTherapist(element);
+            visitCard.render();
+          }
+          if (element.Doctor == "Dentist") {
+            const visitCard = new VisitDentist(element);
+            visitCard.render();
+          }
+        });
+      }
+    });
+  }
+  // FILTER CARDS
+  filterCard() {
+    this.cards = this.cardsContainer.getElementsByTagName("li");
+    const filter = this.searchInput.value.toUpperCase();
+    for (let i = 0; i < this.cards.length; i++) {
+      const patient = this.cards[i].querySelector(".card-title span");
+      const txtValue = patient.textContent || patient.innerText;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        this.cards[i].style.display = "";
+      } else {
+        this.cards[i].style.display = "none";
+      }
     }
-    // RENDER ALL AVAILABLE CARDS TO DASHBOARD
-    renderDashBoard(){
-        
-        const cardsDisplay = new AllCards()
-        
-        cardsDisplay.getCardsData().then(Response => {
-            
-            if(Response.length == 0){
-                // should display no cards if there are no cards available
-                this.noCards()
-            }
-            else{
-                Response.forEach(element => {
-                
-                    if(element.Doctor == 'Cardiologist'){
-                        const visitCard = new VisitCardiologist(element)
-                        visitCard.render()
-                    }
-                    if(element.Doctor == 'Therapist'){
-                        const visitCard = new VisitTherapist(element)
-                        visitCard.render()
-                    }
-                    if(element.Doctor == 'Dentist'){
-                        const visitCard = new VisitDentist(element)
-                        visitCard.render()
-                    }
-                });
-            }
-            
-        })
-    }
-    // FILTER CARDS
-    filterCard(){
-        this.cards = this.cardsContainer.getElementsByTagName('li')
-        const filter = this.searchInput.value.toUpperCase();
+  }
+  // FILTER CARDS DROPDOWN
+  filterDropdown(selection, elementName) {
+    //console.log(param)
+    selection.onchange = () => {
+      const dropdownText = selection.options[selection.selectedIndex].innerHTML;
+      console.log(dropdownText);
+
+      this.cards = this.cardsContainer.getElementsByTagName("li");
+      const filter = dropdownText.toUpperCase();
+      if (dropdownText == "All") {
         for (let i = 0; i < this.cards.length; i++) {
-            const patient = this.cards[i].querySelector('.card-title span')
-            const txtValue = patient.textContent || patient.innerText;
-            if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                this.cards[i].style.display = "";
-            } else {
-                this.cards[i].style.display = "none";
-            }
+          const scard = this.cards[i]
+            .querySelector(`.${elementName}`)
+            .closest("li");
+          console.log(scard);
+          scard.style.display = "";
         }
-    }
-    // FILTER CARDS DROPDOWN
-    filterDropdown(selection, elementName ){
-        
-        //console.log(param)
-        selection.onchange = () =>{
-            const dropdownText = selection.options[selection.selectedIndex].innerHTML;
-            console.log(dropdownText)
-
-            this.cards = this.cardsContainer.getElementsByTagName('li')
-            const filter = dropdownText.toUpperCase();
-            if(dropdownText == 'All'){
-                for (let i = 0; i < this.cards.length; i++) {
-                    const scard = this.cards[i].querySelector(`.${elementName}`).closest("li")
-                    console.log(scard)
-                    scard.style.display = ""
-                }
-            }
-            else{
-                for (let i = 0; i < this.cards.length; i++) {
-                    const searchedItem = this.cards[i].querySelector(`.${elementName}`)
-                    const txtValue = searchedItem.textContent || searchedItem.innerText;
-                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                        this.cards[i].style.display = "";
-                    } else {
-                        this.cards[i].style.display = "none";
-                    }
-                }
-            }
-            
+      } else {
+        for (let i = 0; i < this.cards.length; i++) {
+          const searchedItem = this.cards[i].querySelector(`.${elementName}`);
+          const txtValue = searchedItem.textContent || searchedItem.innerText;
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            this.cards[i].style.display = "";
+          } else {
+            this.cards[i].style.display = "none";
+          }
         }
-       
-    }
-    // IF THERE ARE NO CARDS RENDER NO CARDS
-    noCards(){
-        this.noCardsDisplay = document.createElement('li')
-        this.noCardsDisplay.className = 'nocard-container'
-        this.noCardsDisplay.innerHTML = `
+      }
+    };
+  }
+  // IF THERE ARE NO CARDS RENDER NO CARDS
+  noCards() {
+    this.noCardsDisplay = document.createElement("li");
+    this.noCardsDisplay.className = "nocard-container";
+    this.noCardsDisplay.innerHTML = `
             <h4 class="nocard-text ">No Cards Available</h4>
-        `
-        this.cardsContainer.appendChild(this.noCardsDisplay)
-    }
+        `;
+    this.cardsContainer.appendChild(this.noCardsDisplay);
+  }
 }
