@@ -4,8 +4,11 @@ import { CardModal } from "./Modal/cardModal"
 import { VisitCardiologist } from "./Cards/visitCardiologist"
 import { VisitTherapist } from "./Cards/visitTherapist"
 import { VisitDentist } from "./Cards/visitDentist"
-export class DashBoard {
+import { LoginAuth } from "./Login/loginAuth"
+
+export class DashBoard extends LoginAuth {
     constructor(){
+        super()
         this.main = document.querySelector('.main')
         this.newUserKey = 'isLoggedIn'
     }
@@ -44,46 +47,27 @@ export class DashBoard {
                             <span data-feather="plus-circle"></span>
                         </a>
                         </h6>
-                        <ul class="nav flex-column mb-2">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                            <span data-feather="file-text"></span>
-                            Open
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                            <span data-feather="file-text"></span>
-                            Done
-                            </a>
-                        </li>
-                        </ul>
+                        <div>
+                            <select class="status form-select" id="status" aria-label="Default select example">
+                                <option value="1">All</option>
+                                <option value="2">Open</option>
+                                <option value="3">Closed</option>
+                            </select>
+                        </div>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
                         <span>Search by urgency</span>
                         <a class="link-secondary" href="#" aria-label="Add a new report">
                             <span data-feather="plus-circle"></span>
                         </a>
                         </h6>
-                        <ul class="nav flex-column mb-2">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                            <span data-feather="file-text"></span>
-                            High
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                            <span data-feather="file-text"></span>
-                            Normal
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                            <span data-feather="file-text"></span>
-                            Low
-                            </a>
-                        </li>
-                        </ul>
+                        <div>
+                            <select class="form-select" id="urgency"aria-label="Default select example">
+                                <option value="1">All</option>
+                                <option value="2">Regular</option>
+                                <option value="3">Priority</option>
+                                <option value="3">Urgent</option>
+                            </select>
+                        </div>
             </div>
             </nav>
             <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-sm-3">
@@ -100,12 +84,12 @@ export class DashBoard {
         `
         this.main.appendChild(this.dashboardContainer)
         
-        // this.renderDashBoard()
-        
         this.cardsContainer = document.querySelector('.table-responsive')
         this.createCardBtn = document.querySelector('.create-visit-btn')
         this.authBtn = document.querySelector('.auth')
         this.searchInput = document.getElementById('search-input')
+        this.urgencyselect = document.getElementById('urgency')
+        this.statusSelect = document.getElementById('status')
         
         // CREATE CARD BUTTON
         this.createCardBtn.onclick = () =>{
@@ -129,38 +113,25 @@ export class DashBoard {
             this.filterCard()
         }
         
-
+        this.filterDropdown(this.urgencyselect, 'urgency-desc')
+        this.filterDropdown(this.statusSelect, 'status-desc')
         
-    }
-    getCookies(name){
-        const cookiesArr = document.cookie.split(";")
-        
-    
-        for(let i = 0; i < cookiesArr.length; i++){
-            const cookiePair = cookiesArr[i].split('=');
-    
-            if(name == cookiePair[0].trim()) {
-                
-                return cookiePair[1]
-            }
-        }
     }
 
     // CHECK IF IT IS A NEW USER
     authCheck(){ 
         this.loggedIn = this.getCookies(this.newUserKey)
-        const login = new Login()
         this.addDashBoard()
         this.cardsContainer.innerHTML= ''
         if(this.loggedIn == 'true'){
             const expiryDate = new Date()
             expiryDate.setMonth(expiryDate.getMonth() + 1)
             this.renderDashBoard()
-            login.setCookie(this.newUserKey, true, expiryDate.toGMTString());
+            this.setCookie(this.newUserKey, true, expiryDate.toGMTString());
 
         }
         else if(!this.loggedIn){
-            
+            const login = new Login()
             //this.addDashBoard()
             
             this.authBtn.innerHTML = 'Sign in'
@@ -210,7 +181,6 @@ export class DashBoard {
     }
     // FILTER CARDS
     filterCard(){
-        
         this.cards = this.cardsContainer.getElementsByTagName('li')
         const filter = this.searchInput.value.toUpperCase();
         for (let i = 0; i < this.cards.length; i++) {
@@ -222,6 +192,38 @@ export class DashBoard {
                 this.cards[i].style.display = "none";
             }
         }
+    }
+    // FILTER CARDS DROPDOWN
+    filterDropdown(selection, elementName ){
+        
+        //console.log(param)
+        selection.onchange = () =>{
+            const dropdownText = selection.options[selection.selectedIndex].innerHTML;
+            console.log(dropdownText)
+
+            this.cards = this.cardsContainer.getElementsByTagName('li')
+            const filter = dropdownText.toUpperCase();
+            if(dropdownText == 'All'){
+                for (let i = 0; i < this.cards.length; i++) {
+                    const scard = this.cards[i].querySelector(`.${elementName}`).closest("li")
+                    console.log(scard)
+                    scard.style.display = ""
+                }
+            }
+            else{
+                for (let i = 0; i < this.cards.length; i++) {
+                    const searchedItem = this.cards[i].querySelector(`.${elementName}`)
+                    const txtValue = searchedItem.textContent || searchedItem.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        this.cards[i].style.display = "";
+                    } else {
+                        this.cards[i].style.display = "none";
+                    }
+                }
+            }
+            
+        }
+       
     }
     // IF THERE ARE NO CARDS RENDER NO CARDS
     noCards(){

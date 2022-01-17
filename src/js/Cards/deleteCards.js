@@ -1,25 +1,13 @@
-import { BaseAxios } from "../CustomAxios/baseAxios";
+//import { BaseAxios } from "../CustomAxios/baseAxios";
+import { LoginAuth } from "../Login/loginAuth";
 
-export class DeleteCards extends BaseAxios {
+export class DeleteCards extends LoginAuth {
     constructor(deletedId) {
-        super('https://ajax.test-danit.com/api/v2/cards');
+        super();
         // this.token = 'ec4c2bc2-374f-463a-9c35-596fa537efc8';
         
-        this.url = deletedId
+        this.url = `cards/${deletedId}`
         
-    }
-    getCookies(name){
-        const cookiesArr = document.cookie.split(";")
-        
-    
-        for(let i = 0; i < cookiesArr.length; i++){
-            const cookiePair = cookiesArr[i].split('=');
-    
-            if(name == cookiePair[0].trim()) {
-                
-                return cookiePair[1]
-            }
-        }
     }
     delete(){
         this.token = this.getCookies('token')

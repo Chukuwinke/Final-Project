@@ -1,9 +1,11 @@
-import { BaseAxios } from "../CustomAxios/baseAxios";
+//import { BaseAxios } from "../CustomAxios/baseAxios";
+import { LoginAuth } from "../Login/loginAuth";
+import { CardModal } from "../Modal/cardModal";
 import { DeleteCards } from "./deleteCards";
 
-export class Visit extends BaseAxios{
+export class Visit extends LoginAuth{
     constructor(data){
-        super('https://ajax.test-danit.com/api/v2/cards/')
+        super()
         const {Doctor, FirstName, LastName, Purpose, Description, Urgency, Status, id} = data
         this.firstName = FirstName
         this.lastName = LastName
@@ -13,12 +15,12 @@ export class Visit extends BaseAxios{
         this.urgency = Urgency
         this.status = Status
         this.id = id
-        
+        this.token = this.getCookies('token')
         this.cardsSection = document.querySelector('.table-responsive')
-        
+        this.updateTriggered = false
     }
     // CLEANUP := data parameter NOT NEEDED
-    defaultCardField(data) {
+    defaultCardField() {
         //this.cardContainer = document.createElement('ul')
         this.card = document.createElement('li')
         this.card.className = 'me-4'
@@ -42,12 +44,12 @@ export class Visit extends BaseAxios{
                             ${this.description}
                         </p>
                     </div>
-                    <h6>urgency: ${this.urgency}</h6>
-                    <h6>status: ${this.status}</h6>
+                    <h6>urgency: <span class="urgency-desc">${this.urgency}</span></h6>
+                    <h6>status: <span class="status-desc">${this.status}</span></h6>
                 </div>
                 
                 <div class="d-flex mt-2">
-                    <a href="#" class="btn btn-outline-warning btn-sm" >edit</a>
+                    <a href="#" class="btn btn-outline-warning btn-sm" id='edit-btn${this.id}'>edit</a>
                     <a class="btn btn-outline-info btn-sm ms-auto" data-bs-toggle="collapse" href="#collapseExample${this.id}" role="button" aria-expanded="false" aria-controls="collapseExample">
                         show more
                     </a>
@@ -57,6 +59,7 @@ export class Visit extends BaseAxios{
         `
         this.cardsSection.appendChild(this.card)
         this.deleteCard()
+        this.updateCard()
         
     }
     deleteCard(){
@@ -68,30 +71,41 @@ export class Visit extends BaseAxios{
 	            'Authorization': `Bearer ${this.token}`
             }
         }
-        this.url = `${this.id}`
+        this.url = `cards/${this.id}`
         
         this.deleteBtn.onclick = () =>{
-            const deleteLogic = new DeleteCards(this.url)
-            deleteLogic.delete()
-            .then(response => {
-                if(response.status == 200){
-                    this.cardsSection.removeChild(this.card)
-                    const card = document.querySelector('.card')
-                    if(!card){
-                        this.noCardsDisplay = document.createElement('li')
-                        this.noCardsDisplay.className = 'nocard-container'
-                        this.noCardsDisplay.innerHTML = `
-                            <h4 class="nocard-text">No Cards Available</h4>
-                        `
-                        this.cardsSection.appendChild(this.noCardsDisplay)
+            this.deleteData(this.url, this.config)
+                .then(response => {
+                    if(response.status == 200){
+                        this.cardsSection.removeChild(this.card)
+                        const card = document.querySelector('.card')
+                        if(!card){
+                            this.noCardsDisplay = document.createElement('li')
+                            this.noCardsDisplay.className = 'nocard-container'
+                            this.noCardsDisplay.innerHTML = `
+                                <h4 class="nocard-text">No Cards Available</h4>
+                            `
+                            this.cardsSection.appendChild(this.noCardsDisplay)
+                        }
                     }
-                }
-                
-            })
+                    
+                })
 
             
         }
 
     }
+    updateCard(){
+        this.updateBtn = document.getElementById(`edit-btn${this.id}`)
+        this.currentCard = document.getElementById(`card${this.id}`)
+
+        this.updateBtn.onclick = () => {
+            this.updateTriggered = true
+            console.log(this.currentCard)
+            const updateModal = new CardModal(this.id, this.updateTriggered)
+            updateModal.createCardModal()
+        }
+    }
+
 }
 
