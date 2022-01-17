@@ -14,11 +14,10 @@ export class BaseAxios {
             const data =  await this.instance.post(url, body, config)
             return data
         } catch (error) {
-            console.error(error.response.data); 
+            console.error(error); 
         }
         
     }
-    //test
     async getData(url, config = {}){
         const {data} = await this.instance.get(url, config)
         //console.log(data)
@@ -30,5 +29,8 @@ export class BaseAxios {
         // console.log(data)
         //return data
         
+    }
+    async updateData(url, body, config = {}){
+        return await this.instance.put(url, body, config)
     }
 }

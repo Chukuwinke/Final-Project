@@ -1,8 +1,11 @@
+//import { main } from "@popperjs/core";
 import { DashBoard } from "../dashBoard";
 import { LoginAuth } from "./loginAuth.js";
 
-export class Login{
+export class Login extends LoginAuth{
     constructor(){
+      super()
+      this.url = '/cards/login'
         this.main = document.querySelector('.main')
         this.body = document.getElementsByTagName('body')[0]
         
@@ -39,7 +42,15 @@ export class Login{
       </div>
         `
         this.main.appendChild(this.loginContainer)
-        
+        this.body.onclick = (e) => {
+          if(e.target.className == this.loginContainer.className || e.target.className == this.body.className){
+            console.log(this.main)
+            this.main.removeChild(this.loginContainer)
+            this.body.classList.remove('login-body')
+            const dashboardPage = new DashBoard();
+            dashboardPage.authCheck()
+          }
+        }
         
     }
 
@@ -49,7 +60,7 @@ export class Login{
         this.emailInput = document.getElementById('floatingInput');
         this.passwordInput = document.getElementById('floatingPassword');
 
-        this.login = new LoginAuth();
+        //this.login = new LoginAuth();
         
 
         this.loginBtn.onclick = (e) =>{
@@ -57,7 +68,7 @@ export class Login{
           const emailValue = this.emailInput.value;
           const passwordValue = this.passwordInput.value;
 
-          this.login.getToken(emailValue, passwordValue).then(response => {
+          this.getToken(emailValue, passwordValue, this.url).then(response => {
             
             
             if(response.status == 200){
@@ -80,13 +91,6 @@ export class Login{
             
           })
         }
-    }
-    setCookie(name, param="", maxAge=""){
-      const key = name
-      const value = param
-      const expireAfter = maxAge
-
-      document.cookie = `${key}=${value};path=/;expires=${expireAfter};`;
     }
     start(){
         this.displayLogin()

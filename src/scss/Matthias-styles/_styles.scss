@@ -21,18 +21,27 @@ body {
   justify-content: center;
   padding-top: 40px;
   padding-bottom: 40px;
-  background-color: #f5f5f5;
+  background-color: grey;
   
 }
 .main{
     width: 100%;
 }
-
+.modal-error{
+  position:  absolute;
+  color:  red;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 100000;
+}
 .form-signin {
   width: 100%;
   max-width: 330px;
   padding: 15px;
   margin: auto;
+  background-color: #f5f5f5;
+  border-radius: 4px;
 }
 
 .form-signin .checkbox {
@@ -179,6 +188,10 @@ body {
 
 .modal-alert .modal-dialog {
   width: 380px;
+}
+#status, #urgency{
+  border: none;
+  width: 99%;
 }
 
 .border-right { border-right: 1px solid #eee; }

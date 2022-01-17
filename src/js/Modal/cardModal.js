@@ -2,38 +2,29 @@
 import { VisitCardiologist } from "../Cards/visitCardiologist";
 import { VisitDentist } from "../Cards/visitDentist";
 import { VisitTherapist } from "../Cards/visitTherapist";
-import { BaseAxios } from "../CustomAxios/baseAxios";
+import { LoginAuth } from "../Login/loginAuth";
 
 
-
-const getCookie = (name) => {
-  const cookiesArr = document.cookie.split(";")
-
-  for(let i = 0; i < cookiesArr.length; i++){
-      const cookiePair = cookiesArr[i].split('=');
-
-      if(name == cookiePair[0].trim()) {
-          return cookiePair[1]
-      }
-  }
-}
-
-export class CardModal extends BaseAxios {
-  constructor() {
-    super('https://ajax.test-danit.com/api/v2/')
-    this.token = getCookie('token')
-    this.url = 'cards'
+export class CardModal extends LoginAuth {
+  constructor(id ='', updateTriggered = false) {
+    super()
+    this.url = '/cards'
+    this.token = this.getCookies('token')
     this.config ={
         headers:{
             "Content-Type" : "application/json",
             'Authorization': `Bearer ${this.token}`
         }
     }
+    this.id = id
+    this.updateTriggered = updateTriggered
     this.body = document.querySelector("body");
     this.fieldContainer = document.createElement("div");
+    this.errorModal = document.createElement('div')
   }
   // CREATE THE MODAL WITH DEFAULT FIELDS
   createCardModal() {
+    
     this.modal = document.createElement("div");
     this.modal.innerHTML = `
         <div class="modal modal-sheet  d-block bg-secondary  py-5" tabindex="-1" role="dialog" id="modalSheet">
@@ -190,94 +181,128 @@ export class CardModal extends BaseAxios {
       // GET THE CURRENT SELECTED VALUE
       const [selectedValue, selectedText] = this.modalDropdown(this.cardTypeModal)
       
-        
-      if (selectedValue == "1") {
-        this.cardiologistFields();
-        const bloodPressure = document.getElementById('pressureInput1')
-        const prevDiseases = document.getElementById('cardiovascularInput1')
-        this.age = document.getElementById('ageInput1')
-        this.saveBtn.onclick = () => {
-          this.data ={
-            Doctor: `${selectedText}`,
-            FirstName: `${this.firstName.value}`,
-            LastName: `${this.lastName.value}`,
-            Purpose: `${this.purposeOfVisit.value}`,
-            Description: `${this.description.value}`,
-            Urgency: `${this.urgencyText}`,
-            Status: `${this.statusText}`,
-            Pressure: `${bloodPressure.value}`,
-            prevDiseases: `${prevDiseases.value}`,
-            Age: `${this.age.value}`,
- 
-        }
-        this.sendInput(this.data)
-        };
-        
-      } else if (selectedValue == "2") {
-        this.dentistFields();
-        this.lastVisit = document.getElementById('last-visit')
-        this.saveBtn.onclick = () => {
-          this.data ={
-            Doctor: `${selectedText}`,
-            FirstName: `${this.firstName.value}`,
-            LastName: `${this.lastName.value}`,
-            Purpose: `${this.purposeOfVisit.value}`,
-            Description: `${this.description.value}`,
-            Urgency: `${this.urgencyText}`,
-            Status: `${this.statusText}`,
-            prevVisit: `${this.lastVisit.value}`,
-          }
-          this.sendInput(this.data)
-        };
-      } else if (selectedValue == "3") {
-        this.therapistFields();
-        this.age = document.getElementById('ageInput1')
-        this.saveBtn.onclick = () => {
-          this.data ={
-            Doctor: `${selectedText}`,
-            FirstName: `${this.firstName.value}`,
-            LastName: `${this.lastName.value}`,
-            Purpose: `${this.purposeOfVisit.value}`,
-            Description: `${this.description.value}`,
-            Urgency: `${this.urgencyText}`,
-            Status: `${this.statusText}`,
-            Age: `${this.age.value}`,
-          }
-            this.sendInput(this.data)
-            
-        };
-      } else {
-        return;
+      switch(selectedValue){
+        case '1':
+          this.cardiologistFields();
+          this.bloodPressure = document.getElementById('pressureInput1')
+          this.prevDiseases = document.getElementById('cardiovascularInput1')
+          this.age = document.getElementById('ageInput1')
+          break;
+        case '2':
+          this.dentistFields();
+          this.lastVisit = document.getElementById('last-visit')
+          break;
+        case '3':
+          this.therapistFields();
+          this.age = document.getElementById('ageInput1')
+          break;
+        default:
+          console.log('none')
       }
+      this.saveBtn.onclick = () => {
+        const fieldsData = this.dataFactory(selectedValue, selectedText)
+        console.log(fieldsData)
+        if(this.updateTriggered){
+          fieldsData.id = this.id
+          console.log(fieldsData)
+          console.log('updating....')
+          this.updateInput(fieldsData)
+        }
+        else{
+          this.sendInput(fieldsData)
+        }
+        
+      }
+      
+      
     };
+  }
+  // CREATE OBJECT TEMPLATE FROM MODAL INPUT
+  dataFactory(selectedValue, selectedText){
+      let specifcData;
+      const defaultData = {
+            Doctor: `${selectedText}`,
+            FirstName: `${this.firstName.value}`,
+            LastName: `${this.lastName.value}`,
+            Purpose: `${this.purposeOfVisit.value}`,
+            Description: `${this.description.value}`,
+            Urgency: `${this.urgencyText}`,
+            Status: `${this.statusText}`,
+      }
+      if(selectedValue == '1'){
+        specifcData = {
+            Pressure: `${this.bloodPressure.value}`,
+            prevDiseases: `${this.prevDiseases.value}`,
+            Age: `${this.age.value}`,
+        }
+      }
+      else if(selectedValue == '2'){
+        specifcData ={
+            prevVisit: `${this.lastVisit.value}`,
+        }
+      }
+      else if(selectedValue == '3'){
+        specifcData = {
+          Age: `${this.age.value}`,
+        }
+      }
+      return {...defaultData, ...specifcData}
+     
   }
   // SEND INPUT TO BACKEND AND RENDER CARD TO DASHBOARD WITH RESPONSE
   sendInput(fieldsData){
     const responseData = this.postData(this.url, fieldsData, this.config)
       responseData.then(response => {
-          if(response.status == 200){
+          if(response && response.status == 200){
             if(this.noCardsDisplay){
               this.cardsContainer.removeChild(this.noCardsDisplay)
             }
-             
-
             const {data} = response
-            if(data.Doctor == 'Cardiologist'){
-              const visit = new VisitCardiologist(data)
-              visit.render()
-            }
-            else if(data.Doctor == 'Dentist'){
-              const visit = new VisitDentist(data)
-              visit.render()
-            }
-            else if(data.Doctor == 'Therapist'){
-              const visit = new VisitTherapist(data);
-              visit.render()
-            }
-            
+            this.responseCard(data)
+            this.body.removeChild(this.modal)
+          }
+          else{
+            this.errorModal.classList.add('modal-error', 'alert', 'alert-danger', 'd-flex', 'align-items-center')
+            this.errorModal.innerHTML = `
+            <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+            <div>
+              OOPS!! something went wrong
+            </div>
+            `
+            this.modal.appendChild(this.errorModal)
           }
       })
-      this.body.removeChild(this.modal)
+      
+  }
+  
+  responseCard(data){
+    if(data.Doctor == 'Cardiologist'){
+      const visit = new VisitCardiologist(data)
+      visit.render()
+    }
+    else if(data.Doctor == 'Dentist'){
+      const visit = new VisitDentist(data)
+      visit.render()
+    }
+    else if(data.Doctor == 'Therapist'){
+      const visit = new VisitTherapist(data);
+      visit.render()
+    }
+  }
+  updateInput(fieldsData){
+    const updateUrl = `${this.url}/${this.id}`
+    const outdatedCard = document.getElementById(`card${this.id}`)
+    const responseData = this.updateData(updateUrl, fieldsData, this.config)
+      responseData.then(response => {
+          if(response && response.status == 200){
+            if(this.noCardsDisplay){
+              this.cardsContainer.removeChild(this.noCardsDisplay)
+            }
+            this.cardsContainer.removeChild(outdatedCard)
+            const {data} = response
+            this.responseCard(data)
+            this.body.removeChild(this.modal)
+          }
+      })
   }
 }
-

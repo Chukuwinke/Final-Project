@@ -1,8 +1,9 @@
-import { BaseAxios } from "../CustomAxios/baseAxios"
+//import { BaseAxios } from "../CustomAxios/baseAxios"
+import { LoginAuth } from "../Login/loginAuth"
 
-export class AllCards extends BaseAxios{
+export class AllCards extends LoginAuth{
     constructor(){
-        super('https://ajax.test-danit.com/api/v2/')
+        super()
         //CLEAN UP:= CURRENTLY TOKEN IS HARD CODED IT MUST BE PASSED INTO THE CONSTRUCTOR
         this.url = 'cards'
         //CLEAN UP:= CARDSECTION VARIABLE NO LONGER NECESSARY HERE
@@ -21,17 +22,5 @@ export class AllCards extends BaseAxios{
         }
         return this.getData(this.url, this.config)
     }
-    getCookies(name){
-        const cookiesArr = document.cookie.split(";")
-        
     
-        for(let i = 0; i < cookiesArr.length; i++){
-            const cookiePair = cookiesArr[i].split('=');
-    
-            if(name == cookiePair[0].trim()) {
-                
-                return cookiePair[1]
-            }
-        }
-    }
 }
